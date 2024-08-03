@@ -10,9 +10,9 @@ RUN         npm install npm@9.8.1 typescript ts-node @types/node --location=glob
 
 RUN         sudo npm install -g hexo-cli
 
-RUN         npm i -g npx
+RUN         sudo npm i -g npx
 
-RUN         npm install --global yarn
+RUN         sudo npm install --global yarn
 
 USER        container
 ENV         USER=container HOME=/home/container

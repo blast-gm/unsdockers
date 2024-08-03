@@ -8,11 +8,11 @@ RUN         apt update \
 
 RUN         npm install npm@8.11.0 typescript ts-node @types/node --location=global
 
-RUN         npm install -g hexo-cli
+RUN         sudo npm install -g hexo-cli
 
-RUN         npm i -g npx
+RUN         sudo npm i -g npx
 
-RUN         npm install --global yarn
+RUN         sudo npm install --global yarn
 
 USER        container
 ENV         USER=container HOME=/home/container
