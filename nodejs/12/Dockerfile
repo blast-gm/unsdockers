@@ -3,10 +3,12 @@ FROM        --platform=$TARGETOS/$TARGETARCH node:12-bullseye-slim
 LABEL       author="Blast" maintainer="blastlindu@gmail.com"
 
 RUN         apt update \
+            && apt-get install git -y \
+            && npm install -g hexo-cli \
             && apt -y install ffmpeg iproute2 git sqlite3 libsqlite3-dev python3 python3-dev ca-certificates dnsutils tzdata zip tar curl build-essential libtool iputils-ping libnss3 tini \
             && useradd -m -d /home/container container
 
-RUN         npm install npm@latest typescript ts-node @types/node hexo-cli --location=global
+RUN         npm install npm@latest typescript ts-node @types/node --location=global
 
 RUN         sudo npm i -g npx
 
