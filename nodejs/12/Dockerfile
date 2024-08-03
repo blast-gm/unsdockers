@@ -26,12 +26,17 @@ RUN apt update && \
         tini && \
     rm -rf /var/lib/apt/lists/*
 
-# Instala pacotes npm globalmente
+# Instala pacotes npm globalmente como root
 RUN npm install -g \
-        npm@9.8.1 \
+        npm@latest \
         typescript \
         ts-node \
-        @types/node
+        @types/node \
+        npx \
+        yarn
+
+# Instala hexo-cli como root
+RUN npm install -g hexo-cli
 
 # Adiciona o usuário 'container'
 RUN useradd -m -d /home/container container
@@ -40,9 +45,6 @@ RUN useradd -m -d /home/container container
 USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
-
-# Instala hexo-cli como usuário container
-RUN npm install -g hexo-cli
 
 # Define o sinal de parada
 STOPSIGNAL SIGINT
