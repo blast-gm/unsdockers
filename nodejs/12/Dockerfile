@@ -10,9 +10,9 @@ RUN         apt update \
 
 RUN         npm install npm@latest typescript ts-node @types/node --location=global
 
-RUN         sudo npm i -g npx
+RUN         npm i -g npx
 
-RUN         sudo npm install --global yarn
+RUN         npm install --global yarn
 
 USER        container
 ENV         USER=container HOME=/home/container
