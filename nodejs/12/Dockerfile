@@ -28,7 +28,7 @@ RUN apt update && \
 
 # Instala pacotes npm globalmente
 RUN npm install -g \
-        npm@latest \
+        npm@9.8.1 \
         typescript \
         ts-node \
         @types/node \
