@@ -8,7 +8,7 @@ RUN         apt update \
 
 RUN         npm install npm@9.8.1 typescript ts-node @types/node --location=global
 
-RUN         npm install -g hexo-cli
+RUN         sudo npm install -g hexo-cli
 
 RUN         npm i -g npx
 
