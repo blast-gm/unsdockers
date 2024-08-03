@@ -1,4 +1,4 @@
-# Use uma imagem base Node.js
+# Use a imagem base Node.js
 FROM --platform=$TARGETOS/$TARGETARCH node:12-bullseye-slim
 
 LABEL author="Blast" maintainer="blastlindu@gmail.com"
@@ -28,7 +28,6 @@ RUN apt update && \
 
 # Instala pacotes npm globalmente
 RUN npm install -g \
-        hexo-cli \
         npm@latest \
         typescript \
         ts-node \
@@ -43,6 +42,9 @@ RUN useradd -m -d /home/container container
 USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
+
+# Instala hexo-cli como usuário container
+RUN npm install -g hexo-cli
 
 # Define o sinal de parada
 STOPSIGNAL SIGINT
