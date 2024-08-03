@@ -31,9 +31,7 @@ RUN npm install -g \
         npm@9.8.1 \
         typescript \
         ts-node \
-        @types/node \
-        npx \
-        yarn
+        @types/node
 
 # Adiciona o usuário 'container'
 RUN useradd -m -d /home/container container
