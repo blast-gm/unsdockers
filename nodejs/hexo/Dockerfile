@@ -1,4 +1,4 @@
-FROM        node:slimm
+FROM        node:slim
 
 LABEL       author="Blast" maintainer="blastlindu@gmail.com"
 
