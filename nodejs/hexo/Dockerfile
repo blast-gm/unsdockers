@@ -132,10 +132,5 @@ EXPOSE ${HEXO_SERVER_PORT}
 #   echo "***** Starting server on port ${HEXO_SERVER_PORT} *****" && \
 #   hexo server -d -p ${HEXO_SERVER_PORT}
 
-COPY entrypoint.sh /entrypoint.sh
-COPY userRun.sh /userRun.sh
-COPY hexo_run.js /hexo_run.js
-
-RUN chmod +x /*.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
+CMD ["/entrypoint.sh"]
