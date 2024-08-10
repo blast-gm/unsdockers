@@ -1,58 +1,20 @@
-# Use a imagem base Node.js
-FROM --platform=$TARGETOS/$TARGETARCH node:12-bullseye-slim
+FROM        --platform=$TARGETOS/$TARGETARCH node:12-bullseye-slim
 
-LABEL author="Blast" maintainer="blastlindu@gmail.com"
+LABEL       author="Blast" maintainer="blastlindu@gmail.com"
 
-# Atualiza e instala dependências necessárias
-RUN apt update && \
-    apt-get install -y \
-        git \
-        ffmpeg \
-        iproute2 \
-        sqlite3 \
-        libsqlite3-dev \
-        python3 \
-        python3-dev \
-        ca-certificates \
-        dnsutils \
-        tzdata \
-        zip \
-        tar \
-        curl \
-        build-essential \
-        libtool \
-        iputils-ping \
-        libnss3 \
-        tini && \
-    rm -rf /var/lib/apt/lists/*
+RUN         apt update \
+            && apt -y install ffmpeg yarn nasm iproute2 git sqlite3 libsqlite3-dev python3 python3-dev ca-certificates dnsutils tzdata zip tar curl build-essential libtool iputils-ping libnss3 tini \
+            && useradd -m -d /home/container container
 
-# Instala pacotes npm globalmente como root
-RUN npm install -g \
-        npm@latest \
-        typescript \
-        ts-node \
-        @types/node \
-        npx \
-        yarn
+RUN         npm install npm@9.8.1 npx yarn typescript ts-node @types/node nrm npm-check --location=global
 
-# Instala hexo-cli como root
-RUN npm install -g hexo-cli
+USER        container
+ENV         USER=container HOME=/home/container
+WORKDIR     /home/container
 
-# Adiciona o usuário 'container'
-RUN useradd -m -d /home/container container
-
-# Configura o ambiente e o diretório de trabalho
-USER container
-ENV USER=container HOME=/home/container
-WORKDIR /home/container
-
-# Define o sinal de parada
 STOPSIGNAL SIGINT
 
-# Copia e configura o script de entrada
-COPY --chown=container:container ./../entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Define o entrypoint e o comando padrão
-ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
-CMD ["/entrypoint.sh"]
+COPY        --chown=container:container ./../entrypoint.sh /entrypoint.sh
+RUN         chmod +x /entrypoint.sh
+ENTRYPOINT    ["/usr/bin/tini", "-g", "--"]
+CMD         ["/entrypoint.sh"]
