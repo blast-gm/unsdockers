@@ -3,14 +3,10 @@ FROM        --platform=$TARGETOS/$TARGETARCH node:17-bullseye-slim
 LABEL       author="Blast" maintainer="blastlindu@gmail.com"
 
 RUN         apt update \
-            && apt -y install ffmpeg iproute2 git sqlite3 libsqlite3-dev python3 python3-dev ca-certificates dnsutils tzdata zip tar curl build-essential libtool iputils-ping libnss3 libnss3 tini \
+            && apt -y install ffmpeg yarn nasm iproute2 git sqlite3 libsqlite3-dev python3 python3-dev ca-certificates dnsutils tzdata zip tar curl build-essential libtool iputils-ping libnss3 tini \
             && useradd -m -d /home/container container
 
-RUN         npm install npm@8.11.0 typescript ts-node @types/node hexo-cli --location=global
-
-RUN         sudo npm i -g npx
-
-RUN         sudo npm install --global yarn
+RUN         npm install npm@latest npx yarn typescript ts-node @types/node nrm npm-check --location=global
 
 USER        container
 ENV         USER=container HOME=/home/container
