@@ -37,8 +37,7 @@ RUN apt update && apt install -y --no-install-recommends \
     php-mbstring \
     php-tokenizer \
     php-simplexml \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean
 
 # Copie o Composer da imagem oficial para o contêiner
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
