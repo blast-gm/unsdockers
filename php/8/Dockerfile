@@ -13,11 +13,15 @@ RUN         apt install -y php php-xml php-exif php-fpm php-session php-soap php
 
 # Configuração de usuário e diretório de trabalho
 USER        container
-ENV         USER container
-ENV         HOME /home/container
-
+ENV         USER=container HOME=/home/container
 WORKDIR     /home/container
+
+STOPSIGNAL SIGINT
+
 COPY        ./../entrypoint.sh /entrypoint.sh
 
 # Defina o comando de inicialização do contêiner
-CMD         ["/bin/bash", "/entrypoint.sh"]
+COPY        --chown=container:container ./../entrypoint.sh /entrypoint.sh
+RUN         chmod +x /entrypoint.sh
+ENTRYPOINT    ["/usr/bin/tini", "-g", "--"]
+CMD         ["/entrypoint.sh"]
