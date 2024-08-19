@@ -11,7 +11,7 @@ ENV         USER container
 ENV         HOME /home/container
 
 WORKDIR     /home/container
-COPY       ../php/entrypoint.sh /entrypoint.sh
+COPY       ./../entrypoint.sh /entrypoint.sh
 
 
 CMD       ["/bin/ash", "../php/entrypoint.sh"]
