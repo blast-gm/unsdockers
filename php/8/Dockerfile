@@ -1,4 +1,4 @@
-FROM debian:slim
+FROM ghcr.io/parkervcp/yolks:ubuntu
 
 # Instale as dependências e o PHP com extensões necessárias
 RUN apt-get update && apt-get install -y --no-install-recommends \
