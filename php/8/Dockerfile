@@ -1,4 +1,4 @@
-FROM        ubuntu:22.04
+FROM        --platform=$TARGETOS/$TARGETARCH ubuntu:22.04
 
 LABEL       author="Blast" maintainer="blastlindu@gmail.com"
 
