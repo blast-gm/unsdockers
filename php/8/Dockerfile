@@ -1,15 +1,55 @@
-FROM alpine:latest
+FROM debian:slim
 
-RUN apk --update --no-cache add curl ca-certificates
-RUN apk add php8 php8-xml php8-exif php8-fpm php8-session php8-soap php8-openssl php8-gmp php8-pdo_odbc php8-json php8-dom php8-pdo php8-zip php8-mysqli php8-sqlite3 php8-pdo_pgsql php8-bcmath php8-gd php8-odbc php8-pdo_mysql php8-pdo_sqlite php8-gettext php8-xmlreader php8-bz2 php8-iconv php8-pdo_dblib php8-curl php8-ctype php8-phar php8-fileinfo php8-mbstring php8-tokenizer php8-simplexml
-COPY --from=composer:latest  /usr/bin/composer /usr/bin/composer
+# Instale as dependências e o PHP com extensões necessárias
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    php \
+    php-xml \
+    php-exif \
+    php-fpm \
+    php-session \
+    php-soap \
+    php-openssl \
+    php-gmp \
+    php-pdo-odbc \
+    php-json \
+    php-dom \
+    php-pdo \
+    php-zip \
+    php-mysqli \
+    php-sqlite3 \
+    php-pgsql \
+    php-bcmath \
+    php-gd \
+    php-odbc \
+    php-mysql \
+    php-pdo-mysql \
+    php-sqlite3 \
+    php-gettext \
+    php-xmlreader \
+    php-bz2 \
+    php-iconv \
+    php-curl \
+    php-ctype \
+    php-phar \
+    php-fileinfo \
+    php-mbstring \
+    php-tokenizer \
+    php-simplexml \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
+# Copie o Composer da imagem oficial para o contêiner
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Configuração de usuário e diretório de trabalho
 USER container
-ENV  USER container
+ENV USER container
 ENV HOME /home/container
 
 WORKDIR /home/container
 COPY ./../entrypoint.sh /entrypoint.sh
 
-
-CMD ["/bin/ash", "/entrypoint.sh"]
+# Defina o comando de inicialização do contêiner
+CMD ["/bin/bash", "/entrypoint.sh"]
