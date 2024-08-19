@@ -4,10 +4,11 @@ LABEL       author="Blast" maintainer="blastlindu@gmail.com"
 
 # Instale as dependências e o PHP com extensões necessárias
 # Primeiro, atualize e instale as dependências básicas
-RUN         apt update && apt install -y curl ca-certificates && apt-get clean
+RUN         apt update 
+RUN         apt install -y curl ca-certificates
 
 # Agora, instale o PHP e as extensões em um comando separado
-RUN         apt update && apt install -y php php-xml php-exif php-fpm php-session php-soap php-openssl php-gmp php-pdo-odbc php-json php-dom php-pdo php-zip php-mysqli php-sqlite3 php-pgsql php-bcmath php-gd php-odbc php-mysql php-pdo-mysql php-gettext php-xmlreader php-bz2 php-iconv php-curl php-ctype php-phar php-fileinfo php-mbstring php-tokenizer php-simplexml && apt-get clean
+RUN         apt update && apt install -y php php-xml php-exif php-fpm php-session php-soap php-openssl php-gmp php-pdo-odbc php-json php-dom php-pdo php-zip php-mysqli php-sqlite3 php-pgsql php-bcmath php-gd php-odbc php-mysql php-pdo-mysql php-gettext php-xmlreader php-bz2 php-iconv php-curl php-ctype php-phar php-fileinfo php-mbstring php-tokenizer php-simplexml
 
 # Copie o Composer da imagem oficial para o contêiner
 COPY        --from=composer:latest /usr/bin/composer /usr/bin/composer
