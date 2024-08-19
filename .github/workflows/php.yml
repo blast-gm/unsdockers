@@ -35,7 +35,7 @@ jobs:
       - uses: docker/build-push-action@v5
         with:
           context: ./php
-          file: ./nodejs/${{ matrix.tag }}/Dockerfile
+          file: ./php/${{ matrix.tag }}/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
