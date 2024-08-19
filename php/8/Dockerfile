@@ -1,4 +1,4 @@
-FROM         ghcr.io/parkervcp/yolks:ubuntu
+FROM         ubuntu:latest
 
 LABEL       author="Blast" maintainer="blastlindu@gmail.com"
 
