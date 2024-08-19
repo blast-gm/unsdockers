@@ -1,4 +1,4 @@
-name: Build PHP 8.1
+name: Build PHP
 
 on:
   workflow_dispatch:
@@ -18,9 +18,9 @@ jobs:
       packages: write
     strategy:
       fail-fast: false
-    matrix:
-      tag:
-        - 8.1
+      matrix:
+        tag:
+          - 8.1
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
