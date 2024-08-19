@@ -1,9 +1,14 @@
 FROM ghcr.io/parkervcp/yolks:ubuntu
 
 # Instale as dependências e o PHP com extensões necessárias
-RUN apt update && apt install -y --no-install-recommends \
+# Primeiro, atualize e instale as dependências básicas
+RUN apt update && apt install -y \
     curl \
     ca-certificates \
+    && apt-get clean
+
+# Agora, instale o PHP e as extensões em um comando separado
+RUN apt update && apt install -y \
     php \
     php-xml \
     php-exif \
@@ -25,7 +30,6 @@ RUN apt update && apt install -y --no-install-recommends \
     php-odbc \
     php-mysql \
     php-pdo-mysql \
-    php-sqlite3 \
     php-gettext \
     php-xmlreader \
     php-bz2 \
