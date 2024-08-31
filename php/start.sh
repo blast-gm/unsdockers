@@ -1,5 +1,4 @@
-#!/bin/ash
-rm -rf /home/container/tmp/*
+#!/bin/bash
 
-echo "Iniciando o PHP-FPM..."
-/usr/sbin/php-fpm8 --fpm-config /home/container/php-fpm/php-fpm.conf --daemonize
+echo "Iniciando o Servidor.."
+php -S 0.0.0.0:{{server.build.default.port}}
