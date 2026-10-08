@@ -14,6 +14,7 @@ mkdir -p "$DB_DIR" "$RUN_DIR"
 
 FRESHCLAM_CONF="$CLAM_DIR/freshclam.conf"
 cat > "$FRESHCLAM_CONF" <<EOF
+DatabaseMirror database.clamav.net
 DatabaseDirectory $DB_DIR
 UpdateLogFile $CLAM_DIR/freshclam.log
 PidFile $RUN_DIR/freshclam.pid
@@ -60,7 +61,14 @@ EOF
 
 echo "==> Verificando assinaturas do ClamAV (pode levar minutos na 1a vez)..."
 if [ -z "$(ls -A "$DB_DIR" 2>/dev/null)" ]; then
-  freshclam --config-file="$FRESHCLAM_CONF" || echo "AVISO: freshclam falhou agora; vai tentar de novo em segundo plano."
+  # O clamd não sobe sem pelo menos uma base de assinaturas no DB_DIR, então
+  # insiste no freshclam (rede instável, mirror lento etc.) antes de seguir.
+  for i in $(seq 1 10); do
+    freshclam --config-file="$FRESHCLAM_CONF" && break
+    echo "AVISO: freshclam falhou (tentativa $i/10); tentando de novo em 15s..."
+    sleep 15
+  done
+  [ -n "$(ls -A "$DB_DIR" 2>/dev/null)" ] || echo "AVISO: sem assinaturas ainda; o clamd pode falhar ao subir. Veja $CLAM_DIR/freshclam.log."
 fi
 
 # Atualiza as assinaturas periodicamente em segundo plano (a cada 6h).
