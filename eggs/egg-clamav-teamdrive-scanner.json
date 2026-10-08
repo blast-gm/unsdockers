@@ -1,0 +1,132 @@
+{
+    "_comment": "Egg exportado pelo painel Pterodactyl - https://pterodactyl.io. Imagem: ghcr.io/blast-gm/unsdockers:clamav_teamdrive-scanner (clamav/teamdrive-scanner neste repositorio).",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-10-08T00:00:00+00:00",
+    "name": "ClamAV TeamDrive Scanner",
+    "author": "blastlindu@gmail.com",
+    "description": "Servico HTTP com token que escaneia arquivos em stream usando ClamAV (clamd + freshclam) e devolve um veredito assinado (HMAC). Pensado para rodar separado do servidor de arquivos (ex.: TeamDrive). Codigo e configuracao do ClamAV ja vem dentro da imagem.",
+    "features": null,
+    "docker_images": {
+        "ClamAV + Node 20 (teamdrive-scanner)": "ghcr.io/blast-gm/unsdockers:clamav_teamdrive-scanner"
+    },
+    "file_denylist": [],
+    "startup": "node /opt/teamdrive-scanner/src/server.js",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"\\\"evt\\\":\\\"iniciado\\\"\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/ash\n# Nada para instalar: o codigo do scanner e o ClamAV ja vem dentro da imagem\n# ghcr.io/blast-gm/unsdockers:clamav_teamdrive-scanner. Este passo so confirma\n# que o volume do servidor esta pronto.\nmkdir -p /mnt/server\necho \"OK: nenhuma instalacao necessaria, o app ja esta na imagem.\"\n",
+            "container": "alpine:3.4",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Scanner Token",
+            "description": "Segredo compartilhado com quem for chamar o scanner (ex.: o TeamDrive). Gere com: openssl rand -hex 32. Minimo 24 caracteres.",
+            "env_variable": "SCANNER_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:24",
+            "field_type": "text"
+        },
+        {
+            "name": "Allowed IPs",
+            "description": "IPs/CIDRs IPv4 autorizados a chamar o scanner, separados por virgula (ex.: 10.0.0.5,10.0.1.0/24). Vazio = qualquer IP com o token certo.",
+            "env_variable": "ALLOWED_IPS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Port",
+            "description": "Porta onde o scanner escuta HTTP (defina a mesma na alocacao do servidor).",
+            "env_variable": "PORT",
+            "default_value": "8080",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Max File MB",
+            "description": "Maior arquivo aceito, em MB. O ClamAV nao escaneia arquivo de 2 GiB ou mais, por isso o teto util e 2047.",
+            "env_variable": "MAX_FILE_MB",
+            "default_value": "2047",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,2047",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Concurrent Scans",
+            "description": "Quantos arquivos o clamd escaneia ao mesmo tempo.",
+            "env_variable": "MAX_CONCURRENT_SCANS",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,16",
+            "field_type": "text"
+        },
+        {
+            "name": "Queue Max",
+            "description": "Quantas requisicoes podem esperar vaga de escaneamento antes de receber 429.",
+            "env_variable": "QUEUE_MAX",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Queue Wait Seconds",
+            "description": "Quanto tempo uma requisicao espera na fila antes de receber 429.",
+            "env_variable": "QUEUE_WAIT_SECONDS",
+            "default_value": "120",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Scan Timeout Seconds",
+            "description": "Tempo maximo para escanear um arquivo.",
+            "env_variable": "SCAN_TIMEOUT_SECONDS",
+            "default_value": "1800",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Client Idle Seconds",
+            "description": "Derruba o cliente se ele ficar esse tempo sem enviar bytes.",
+            "env_variable": "CLIENT_IDLE_SECONDS",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Trust Proxy",
+            "description": "1 se houver um proxy HTTPS na frente do scanner (ajusta o IP real vindo de X-Forwarded-For).",
+            "env_variable": "TRUST_PROXY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+        }
+    ]
+}

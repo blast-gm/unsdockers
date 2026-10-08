@@ -1,0 +1,14 @@
+{
+  "name": "teamdrive-scanner",
+  "version": "1.0.0",
+  "description": "Serviço de antivírus do TeamDrive: recebe arquivos em stream, escaneia com ClamAV (clamd INSTREAM) e devolve um veredito assinado.",
+  "main": "src/server.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/unit.test.js test/http.test.js",
+    "test:real": "node --test test/real.test.js"
+  }
+}
