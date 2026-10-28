@@ -8,9 +8,15 @@ exec > >(tee -a /home/container/boot.log) 2>&1
 echo "=== boot $(date -u +%FT%TZ) ==="
 
 LT_DIR=/home/container/libretranslate
-mkdir -p "$LT_DIR/packages" "$LT_DIR/cache"
+mkdir -p "$LT_DIR/packages" "$LT_DIR/cache" "$LT_DIR/home"
 export ARGOS_PACKAGES_DIR="$LT_DIR/packages"
 export XDG_CACHE_HOME="$LT_DIR/cache"
+# O filesystem raiz do container e SOMENTE LEITURA (so /home/container, o
+# volume persistente do Pterodactyl, e gravavel) - a imagem base define
+# HOME=/home/libretranslate, que NAO e gravavel aqui (confirmado: o
+# argostranslate tenta criar ~/.local/share e quebra com "Read-only file
+# system" se HOME ficar la). Aponta HOME pro volume gravavel.
+export HOME="$LT_DIR/home"
 
 echo "==> Iniciando LibreTranslate em 127.0.0.1:5000 (idiomas: ${LT_LOAD_ONLY:-todos}; so acessivel de dentro deste container)..."
 # O entrypoint de verdade do LibreTranslate (scripts/entrypoint.sh, dentro de
