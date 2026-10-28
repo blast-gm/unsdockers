@@ -1,0 +1,82 @@
+{
+    "_comment": "Egg exportado pelo painel Pterodactyl - https://pterodactyl.io. Imagem: ghcr.io/blast-gm/unsdockers:manga-ocr_ocr-proxy (manga-ocr/ocr-proxy neste repositorio).",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-10-28T00:00:00+00:00",
+    "name": "OCR mangá/manhwa (manga-ocr + EasyOCR)",
+    "author": "blastlindu@gmail.com",
+    "description": "OCR com DUAS IAs auto-hospedadas (sem API externa, sem chave, sem GPU): manga-ocr (especializado em mangá japonês) e EasyOCR (multi-idioma, cobre coreano/manhwa e o resto). Escolhe o motor pelo idioma pedido ou pela proporção da página (webtoon coreano costuma vir bem mais alto que largo); dá pra forçar um motor especifico por chamada. Atrás de um proxy HTTP com token, igual ao translate-proxy. Pensado para servir o CoopIA.",
+    "features": null,
+    "docker_images": {
+        "manga-ocr + EasyOCR (ocr-proxy)": "ghcr.io/blast-gm/unsdockers:manga-ocr_ocr-proxy"
+    },
+    "file_denylist": [],
+    "startup": "/entrypoint.sh",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Uvicorn running on\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/ash\n# Nada para instalar: o manga-ocr/EasyOCR ja vem dentro da imagem\n# ghcr.io/blast-gm/unsdockers:manga-ocr_ocr-proxy. Este passo so confirma\n# que o volume do servidor esta pronto. Os MODELOS (manga-ocr ~450MB, EasyOCR\n# ~100MB por idioma) sao baixados sozinhos na 1a chamada de cada motor, e\n# ficam guardados no volume persistente (nao baixa de novo a cada reinicio).\nmkdir -p /mnt/server\necho \"OK: nenhuma instalacao necessaria, o app ja esta na imagem.\"\n",
+            "container": "alpine:3.4",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "OCR Token",
+            "description": "Segredo compartilhado com quem for chamar o OCR (o CoopIA). Gere com: openssl rand -hex 32. Minimo 24 caracteres.",
+            "env_variable": "OCR_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:24",
+            "field_type": "text"
+        },
+        {
+            "name": "Allowed IPs",
+            "description": "IPs/CIDRs IPv4 autorizados a chamar o OCR, separados por virgula. Vazio = qualquer IP com o token certo. ATENCAO: nesta infra (Pterodactyl/docker-proxy) o IP que chega aqui costuma ser o gateway interno do Docker do PROPRIO node (ex.: 172.18.0.1), nao o IP publico de quem chama - confira o boot.log (evt=ip_negado) antes de travar nisso, igual aconteceu no translate-proxy.",
+            "env_variable": "ALLOWED_IPS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Port",
+            "description": "Porta onde o proxy escuta HTTP (defina a mesma na alocacao do servidor).",
+            "env_variable": "PORT",
+            "default_value": "8091",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Proporcao webtoon",
+            "description": "Quando a pagina nao diz o idioma (lang=auto): se altura/largura da imagem for maior ou igual a este valor, trata como manhwa/webtoon coreano (EasyOCR) em vez de pagina de manga comum (manga-ocr).",
+            "env_variable": "WEBTOON_RATIO",
+            "default_value": "2.2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Image Bytes",
+            "description": "Tamanho maximo (em bytes) de UMA imagem por chamada de /v1/ocr.",
+            "env_variable": "MAX_IMAGE_BYTES",
+            "default_value": "15728640",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        }
+    ]
+}
