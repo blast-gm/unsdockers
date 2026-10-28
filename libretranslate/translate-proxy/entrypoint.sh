@@ -1,27 +1,32 @@
 #!/bin/bash
 cd /home/container
 
-# Make internal Docker IP address available to processes.
-INTERNAL_IP=$(ip route get 1 | awk '{print $(NF-2);exit}')
-export INTERNAL_IP
-
-# Modelos do Argos Translate (baixados pelo próprio LibreTranslate) ficam sob
-# /home/container, o volume persistente do Pterodactyl, pra não baixar de novo
-# a cada reinício do servidor.
+# Modelos do Argos Translate (baixados pelo proprio LibreTranslate) ficam sob
+# /home/container, o volume persistente do Pterodactyl, pra nao baixar de novo
+# a cada reinicio do servidor. ARGOS_PACKAGES_DIR e a variavel que o
+# argos-translate (usado por baixo do LibreTranslate) realmente le - ver
+# argostranslate/settings.py no repo deles.
 LT_DIR=/home/container/libretranslate
 mkdir -p "$LT_DIR/packages" "$LT_DIR/cache"
-export ARGOS_TRANSLATE_PACKAGES_DIR="$LT_DIR/packages"
+export ARGOS_PACKAGES_DIR="$LT_DIR/packages"
 export XDG_CACHE_HOME="$LT_DIR/cache"
-export HOME=/home/container
+export HOME=/home/libretranslate
 
 echo "==> Iniciando LibreTranslate em 127.0.0.1:5000 (idiomas: ${LT_LOAD_ONLY:-todos}; so acessivel de dentro deste container)..."
-LT_HOST=127.0.0.1 \
-LT_PORT=5000 \
-LT_DISABLE_WEB_UI=true \
-LT_UPDATE_MODELS=true \
-LT_LOAD_ONLY="${LT_LOAD_ONLY}" \
-LT_THREADS="${LT_THREADS:-4}" \
-  libretranslate &
+# O entrypoint de verdade do LibreTranslate (scripts/entrypoint.sh, dentro de
+# /app na imagem base) usa caminhos RELATIVOS (./venv/bin/...), por isso o cd.
+# Ele le LT_HOST/LT_PORT/LT_THREADS/LT_DISABLE_WEB_UI/LT_LOAD_ONLY/LT_UPDATE_MODELS
+# do ambiente (documentados no README do LibreTranslate).
+(
+  cd /app
+  LT_HOST=127.0.0.1 \
+  LT_PORT=5000 \
+  LT_DISABLE_WEB_UI=true \
+  LT_UPDATE_MODELS=true \
+  LT_LOAD_ONLY="${LT_LOAD_ONLY}" \
+  LT_THREADS="${LT_THREADS:-4}" \
+    ./scripts/entrypoint.sh
+) &
 LT_PID=$!
 
 echo "==> Esperando o LibreTranslate responder (1a vez pode levar minutos: baixando os modelos de idioma)..."
