@@ -37,6 +37,7 @@ function load(env = process.env) {
     port: num(env.PORT, 8090),
     tokens, // aceita vários para poder trocar o token sem derrubar quem chama (ex.: o CoopIA)
     upstream: (env.LT_UPSTREAM || 'http://127.0.0.1:5000').replace(/\/+$/, ''), // LibreTranslate local, dentro do mesmo container
+    jaEnginesUpstream: (env.JA_ENGINES_URL || 'http://127.0.0.1:8095').replace(/\/+$/, ''), // ver app/ja_engines.py
     maxTextChars: num(env.MAX_TEXT_CHARS, 20000), // tamanho máximo de UM texto por chamada
     maxBatch: num(env.MAX_BATCH, 50, { min: 1 }), // quantos textos cabem numa chamada /v1/translate-batch
     maxConcurrent: num(env.MAX_CONCURRENT_TRANSLATIONS, 4),

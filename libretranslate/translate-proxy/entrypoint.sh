@@ -41,6 +41,17 @@ curl -sf http://127.0.0.1:5000/languages >/dev/null 2>&1 \
 
 export LT_UPSTREAM=http://127.0.0.1:5000
 
+# Motores extras de tradução japonês->inglês (mangá/casual) - ver app/ja_engines.py. Processo
+# Python SEPARADO (venv próprio, não mexe no venv do LibreTranslate), só em 127.0.0.1 - o proxy
+# Node é quem expõe pra fora, com o mesmo token de sempre. Modelos baixam sozinhos na 1a chamada
+# de cada motor (fica no cache do volume persistente, não baixa de novo a cada reinício).
+export JA_CACHE_DIR="$LT_DIR/ja-cache"
+mkdir -p "$JA_CACHE_DIR"
+echo "==> Subindo motores de tradução JA (fumeto-manga/fugumt) em 127.0.0.1:8095..."
+JA_ENGINES_PORT=8095 /opt/ja-engines-venv/bin/python3 /opt/translate-proxy/ja_engines.py &
+JA_PID=$!
+export JA_ENGINES_URL=http://127.0.0.1:8095
+
 node -v
 
 MODIFIED_STARTUP=$(echo -e ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')
@@ -49,5 +60,5 @@ echo ":/home/container$ ${MODIFIED_STARTUP}"
 eval ${MODIFIED_STARTUP} &
 PROXY_PID=$!
 
-trap 'kill -TERM $PROXY_PID $LT_PID 2>/dev/null' TERM INT
+trap 'kill -TERM $PROXY_PID $LT_PID $JA_PID 2>/dev/null' TERM INT
 wait $PROXY_PID

@@ -61,6 +61,32 @@ function upstreamFetch(cfg, path, body, timeoutMs) {
   });
 }
 
+/** Chama o serviço de motores JA extras (ja_engines.py, FastAPI, mesmo container) - erro vem em
+ *  "detail" (padrão FastAPI), diferente do "error" do LibreTranslate, por isso uma função à parte. */
+function jaEnginesFetch(cfg, path, body, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(body);
+    const url = new URL(cfg.jaEnginesUpstream + path);
+    const r = http.request(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) },
+      timeout: timeoutMs,
+    }, (res) => {
+      const chunks = [];
+      res.on('data', (c) => chunks.push(c));
+      res.on('end', () => {
+        const text = Buffer.concat(chunks).toString('utf8');
+        let data; try { data = JSON.parse(text); } catch { data = { raw: text }; }
+        if (res.statusCode >= 400) return reject(Object.assign(new Error(data.detail || `upstream_${res.statusCode}`), { code: 'upstream', status: res.statusCode, detail: data.detail }));
+        resolve(data);
+      });
+    });
+    r.on('timeout', () => r.destroy(Object.assign(new Error('upstream_timeout'), { code: 'timeout' })));
+    r.on('error', (e) => reject(Object.assign(e, { code: e.code || 'upstream_unavailable' })));
+    r.end(payload);
+  });
+}
+
 function createService(cfg) {
   const gate = new Gate(cfg.maxConcurrent, cfg.queueMax);
   const auth = makeAuth(cfg);
@@ -113,7 +139,8 @@ function createService(cfg) {
       }
     }
 
-    if (url.pathname !== '/v1/translate' && url.pathname !== '/v1/translate-batch' && url.pathname !== '/v1/detect') return reject(res, 404, 'not_found');
+    const KNOWN_PATHS = ['/v1/translate', '/v1/translate-batch', '/v1/detect', '/v1/ja-translate-batch'];
+    if (!KNOWN_PATHS.includes(url.pathname)) return reject(res, 404, 'not_found');
     if (req.method !== 'POST') return reject(res, 405, 'method_not_allowed', {}, { Allow: 'POST' });
 
     let body;
@@ -131,6 +158,25 @@ function createService(cfg) {
         const data = await upstreamFetch(cfg, '/detect', { q }, cfg.translateTimeoutMs);
         counters.translated++;
         return send(res, 200, { id: reqId, detections: data });
+      }
+
+      // /v1/ja-translate-batch: motores extras japonês->inglês (mangá/casual, ver app/ja_engines.py),
+      // melhores que o LibreTranslate/Argos genérico pra esse tipo de texto - mesmo lote/1 crédito
+      // por fala no CoopIA, cada fala vira uma chamada separada ao motor escolhido.
+      if (url.pathname === '/v1/ja-translate-batch') {
+        const engine = String(body.engine || '');
+        if (!['fumeto-manga', 'fugumt'].includes(engine)) return reject(res, 400, 'invalid_engine');
+        const texts = Array.isArray(body.q) ? body.q : null;
+        if (!texts || !texts.length) return reject(res, 400, 'missing_q_array');
+        if (texts.length > cfg.maxBatch) return reject(res, 400, 'batch_too_large', { maxBatch: cfg.maxBatch });
+        const out = [];
+        for (const raw of texts) {
+          const q = cleanText(raw, cfg.maxTextChars);
+          const data = await jaEnginesFetch(cfg, '/v1/ja-translate', { text: q, engine }, cfg.translateTimeoutMs);
+          out.push({ translatedText: data.translatedText, detectedLanguage: 'ja' });
+          counters.translated++; counters.chars += q.length;
+        }
+        return send(res, 200, { id: reqId, results: out });
       }
 
       const source = String(body.source || 'auto').slice(0, 10);
