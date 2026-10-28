@@ -1,0 +1,12 @@
+{
+  "name": "translate-proxy",
+  "version": "1.0.0",
+  "description": "Proxy com token na frente do LibreTranslate (igual ao teamdrive-scanner na frente do ClamAV): autenticação Bearer, lista de IPs e fila de concorrência, repassando para o LibreTranslate que roda em localhost dentro do mesmo container.",
+  "main": "src/server.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.js"
+  }
+}

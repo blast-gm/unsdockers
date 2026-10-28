@@ -1,0 +1,152 @@
+{
+    "_comment": "Egg exportado pelo painel Pterodactyl - https://pterodactyl.io. Imagem: ghcr.io/blast-gm/unsdockers:libretranslate_translate-proxy (libretranslate/translate-proxy neste repositorio).",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-10-28T00:00:00+00:00",
+    "name": "LibreTranslate (translate-proxy)",
+    "author": "blastlindu@gmail.com",
+    "description": "LibreTranslate (traducao neural 100% local, Argos Translate/OPUS-MT, sem API externa e sem chave) rodando em 127.0.0.1 dentro do container, atras de um proxy HTTP com token (igual ao teamdrive-scanner na frente do ClamAV). Pensado para servir o CoopIA.",
+    "features": null,
+    "docker_images": {
+        "LibreTranslate + Node 20 (translate-proxy)": "ghcr.io/blast-gm/unsdockers:libretranslate_translate-proxy"
+    },
+    "file_denylist": [],
+    "startup": "node /opt/translate-proxy/src/server.js",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"\\\"evt\\\":\\\"iniciado\\\"\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/ash\n# Nada para instalar: o LibreTranslate e o proxy ja vem dentro da imagem\n# ghcr.io/blast-gm/unsdockers:libretranslate_translate-proxy. Este passo so confirma\n# que o volume do servidor esta pronto.\nmkdir -p /mnt/server\necho \"OK: nenhuma instalacao necessaria, o app ja esta na imagem.\"\n",
+            "container": "alpine:3.4",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Translate Token",
+            "description": "Segredo compartilhado com quem for chamar o tradutor (o CoopIA). Gere com: openssl rand -hex 32. Minimo 24 caracteres.",
+            "env_variable": "TRANSLATE_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:24",
+            "field_type": "text"
+        },
+        {
+            "name": "Allowed IPs",
+            "description": "IPs/CIDRs IPv4 autorizados a chamar o tradutor, separados por virgula. Vazio = qualquer IP com o token certo (recomendado limitar ao IP do servidor CoopIA).",
+            "env_variable": "ALLOWED_IPS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Port",
+            "description": "Porta onde o proxy escuta HTTP (defina a mesma na alocacao do servidor).",
+            "env_variable": "PORT",
+            "default_value": "8090",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Idiomas a carregar",
+            "description": "Lista separada por virgula dos codigos de idioma a carregar (ex.: en,pt,ja,es,zh,ko,fr,de,ru,it). Vazio = carrega TODOS os pares disponiveis (mais lento na 1a subida, usa mais RAM/disco).",
+            "env_variable": "LT_LOAD_ONLY",
+            "default_value": "en,pt,ja,es,zh,ko,fr,de,ru,it",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Threads do LibreTranslate",
+            "description": "Threads de traducao simultaneas dentro do LibreTranslate (CTranslate2).",
+            "env_variable": "LT_THREADS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,32",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Text Chars",
+            "description": "Tamanho maximo de UM texto por chamada de /v1/translate.",
+            "env_variable": "MAX_TEXT_CHARS",
+            "default_value": "20000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Batch",
+            "description": "Maximo de textos por chamada de /v1/translate-batch (uma chamada por pagina, uma fala por item).",
+            "env_variable": "MAX_BATCH",
+            "default_value": "50",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,500",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Concurrent Translations",
+            "description": "Quantas traducoes o proxy deixa em andamento ao mesmo tempo.",
+            "env_variable": "MAX_CONCURRENT_TRANSLATIONS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,32",
+            "field_type": "text"
+        },
+        {
+            "name": "Queue Max",
+            "description": "Quantas requisicoes podem esperar vaga antes de receber 429.",
+            "env_variable": "QUEUE_MAX",
+            "default_value": "40",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Queue Wait Seconds",
+            "description": "Quanto tempo uma requisicao espera na fila antes de receber 429.",
+            "env_variable": "QUEUE_WAIT_SECONDS",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Translate Timeout Seconds",
+            "description": "Tempo maximo de espera por UMA traducao no LibreTranslate.",
+            "env_variable": "TRANSLATE_TIMEOUT_SECONDS",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Trust Proxy",
+            "description": "1 se houver um proxy HTTPS na frente (ajusta o IP real vindo de X-Forwarded-For).",
+            "env_variable": "TRUST_PROXY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+        }
+    ]
+}
